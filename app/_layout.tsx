@@ -9,7 +9,7 @@ NativeWindStyleSheet.setOutput({
   default: "native",
 })
 
-SplashScreen.preventAutoHideAsync();
+//SplashScreen.preventAutoHideAsync();
 
 
 export default function RootLayout() {
@@ -30,7 +30,7 @@ export default function RootLayout() {
     if (error) throw error;
 
     if (fontsLoaded) {
-      SplashScreen.hideAsync();
+      //SplashScreen.hideAsync();
     }
   }, [fontsLoaded, error]);
 
