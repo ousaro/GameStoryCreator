@@ -1,5 +1,6 @@
 import { View, Text, Image } from 'react-native'
 import React from 'react'
+import { StatusBar } from 'expo-status-bar'
 
 import { icons } from '../../constants'
 import { Tabs } from 'expo-router'
@@ -34,7 +35,7 @@ const TabsLayout = () => {
           borderTopWidth: 1,
           borderTopColor: "#3D5AF1",
           height: 60,
-        }
+        },
 
 
         }}
@@ -106,6 +107,10 @@ const TabsLayout = () => {
 
 
     </Tabs>
+
+
+
+    <StatusBar backgroundColor="#161622" style="light" />
     </>
   )
 }

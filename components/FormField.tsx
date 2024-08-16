@@ -1,16 +1,9 @@
 import { View, Text, TextInput, TouchableOpacity, Image, ImageSourcePropType } from 'react-native'
 import React, { useState } from 'react'
 
+import { FormFieldProps } from '@/types/GlobalTypes';
 import { icons } from '@/constants';
 
-interface FormFieldProps {
-  title: string;
-  value: any;
-  handleChageText: (text: string) => void;
-  otherStyle?: string;
-  placeholder?: string;
-  keyboardType?: string;
-}
 
 const FormField = ({title, value, handleChageText, otherStyle, keyboardType,placeholder, ...props}: FormFieldProps) => {
     const [showPassword, setshowPassword] = useState(false)

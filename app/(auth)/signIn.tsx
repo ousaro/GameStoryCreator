@@ -1,24 +1,15 @@
 import { View, Text, ScrollView, Image, ImageSourcePropType, Alert, AppState} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { images } from "@/constants";
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
-import {  supabase } from '@/lib/supabase';
+import { RefreshSession, SignInWithEmail } from '@/lib/supabase';
+import { useAuthContext } from '@/context/AuthContext';
 
 
-// Tells Supabase Auth to continuously refresh the session automatically if
-// the app is in the foreground. When this is added, you will continue to receive
-// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// if the user's session is terminated. This should only be registered once.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') {
-    supabase.auth.startAutoRefresh()
-  } else {
-    supabase.auth.stopAutoRefresh()
-  }
-})
+RefreshSession()
 
 
 const SignIn = () => {
@@ -28,30 +19,33 @@ const SignIn = () => {
   })
 
   const [isSubmitting, setisSubmitting] = useState(false)
+  const {setIsLoggedIn, setUser} = useAuthContext() 
 
   const Submit = async () =>{
+
+    if(!form.email || !form.password){
+      Alert.alert("Error", "Please fill in all the fields")
+      return;
+    }
     
     setisSubmitting(true);
     
     try {
-      const { data: { session }, error } = await supabase.auth.signInWithPassword({
-        email : form.email,
-        password : form.password,
-      });
-
-      if (error) {
-        Alert.alert(error.message);
       
+      const result = await SignInWithEmail(form.email, form.password );
+      const user  = {
+        id: result?.user?.id || "",
+        username: result?.user?.user_metadata?.username || "",
+        email: result?.user?.email || ""
       }
+      setUser(user)
+      setIsLoggedIn(true)
 
-      if(session){
-        Alert.alert("logged in")
+      router.replace("/home")
+
       
-      }
-
-      // Return the session object on success
-    } catch (e) {
-      Alert.alert('An unexpected error occurred');
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
     
     } finally {
       setisSubmitting(false);

@@ -9,7 +9,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "gen-types": "npx supabase gen types typescript --linked > types/database.types.ts"
   },
   "jest": {
     "preset": "jest-expo"
@@ -22,6 +23,7 @@
     "@supabase/supabase-js": "^2.45.1",
     "expo": "^51.0.26",
     "expo-constants": "~16.0.2",
+    "expo-document-picker": "^12.0.2",
     "expo-font": "~12.0.9",
     "expo-linking": "~6.3.1",
     "expo-router": "~3.5.21",

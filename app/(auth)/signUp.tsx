@@ -1,25 +1,16 @@
 import { View, Text, ScrollView, Image, ImageSourcePropType, AppState, Alert} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { images } from "@/constants";
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
-import { supabase } from '@/lib/supabase';
+import { RefreshSession, SignUpWithEmail } from '@/lib/supabase';
+import { useAuthContext } from '@/context/AuthContext';
 
 
-// Tells Supabase Auth to continuously refresh the session automatically if
-// the app is in the foreground. When this is added, you will continue to receive
-// `onAuthStateChange` events with the `TOKEN_REFRESHED` or `SIGNED_OUT` event
-// if the user's session is terminated. This should only be registered once.
-AppState.addEventListener('change', (state) => {
-  if (state === 'active') {
-    supabase.auth.startAutoRefresh()
-  } else {
-    supabase.auth.stopAutoRefresh()
-  }
-})
 
+RefreshSession();
 
 
 const SignUp = () => {
@@ -30,36 +21,32 @@ const SignUp = () => {
   })
 
   const [isSubmitting, setisSubmitting] = useState(false)
+  const {setIsLoggedIn, setUser} = useAuthContext() 
 
   const Submit = async () => {
+
+    if(!form.email || !form.password || !form.username){
+      Alert.alert("Error", "Please fill in all the fields")
+      return;
+    }
     
     setisSubmitting(true);
     try {
-      const { data: { session }, error } = await supabase.auth.signUp({
-        email : form.email,
-        password : form.password,
-        options: {
-          data: {
-            username: form.username, // Store the username in user_metadata
-          },
-        },
-      });
-  
-      if (error) {
-        Alert.alert(error.message);
-        
-      } else if (!session) {
-        Alert.alert('Please check your inbox for email verification!');
-       
+     
+      const result = await SignUpWithEmail(form.email, form.password, form.username);
+      const user  = {
+        id: result?.user?.id || "",
+        username: result?.user?.user_metadata?.username || "",
+        email: result?.user?.email || ""
       }
+      setUser(user)
+      setIsLoggedIn(true)
 
-      if(session){
-        Alert.alert("registered")
-      }
-  
+
+      router.replace("/home")
       
-    } catch (e) {
-      Alert.alert('An unexpected error occurred');
+    } catch (e: any) {
+      Alert.alert("Error", e.message);
      
     } finally {
       setisSubmitting(false);
