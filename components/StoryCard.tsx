@@ -1,10 +1,21 @@
-import { TouchableOpacity, Text, View, Image, ImageSourcePropType } from 'react-native'
+import { TouchableOpacity, Text, View, Image, Alert, ImageSourcePropType} from 'react-native'
 import React from 'react'
-import { router } from 'expo-router'
+import { router, usePathname, Href } from 'expo-router'
+import {icons} from "@/constants"
+import {deletePost} from "@/lib/supabase"
 
-import { images } from '@/constants'
 
-const StoryCard = ({story} : {story : any})  => {
+const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => {
+
+    const pathName = usePathname()
+    let storyId : string = story.id || ""
+
+    const handleDeletePost = async ()=>{
+        
+        await deletePost(story.id)
+        
+        Alert.alert("Success", "Post successfully deleted")
+    }
 
 
   return (
@@ -20,7 +31,7 @@ const StoryCard = ({story} : {story : any})  => {
                     >
 
                     <Image 
-                        source={{ uri: story.ownerdata.avatar_uri}}
+                        source={{ uri: story.ownerdata?.avatar_uri}}
                         className='w-full h-full rounded-lg'
                         resizeMode='contain'
                     />
@@ -35,10 +46,20 @@ const StoryCard = ({story} : {story : any})  => {
                     </Text>
 
                     <Text className='text-third font-pregular text-xs' numberOfLines={1}>
-                            {story.ownerdata.username}
+                            {story.ownerdata?.username}
                     </Text>
 
                 </View>
+
+                <TouchableOpacity 
+                onPress={handleDeletePost}
+                >
+                    <Image 
+                        source={icons.deleteIcon as ImageSourcePropType}
+                        className='w-6 h-6 rounded-lg'
+                        resizeMode='contain'
+                    />
+                </TouchableOpacity>
 
             </View>
 
@@ -46,7 +67,21 @@ const StoryCard = ({story} : {story : any})  => {
 
         <TouchableOpacity className='w-full h-60 rounded-xl mt-3 relative justify-center items-center' 
         activeOpacity={0.7}
-        onPress={()=> router.push('/create')}
+        onPress={()=>{
+            if(!storyId){
+                Alert.alert("Missing query", "Invalid Story Id")
+                return;
+            }
+
+
+            const route = `/story/${storyId}` as Href;
+
+            if(pathName.startsWith("/story")){
+                router.setParams({storyId})
+            }else{
+                router.push(route)
+            }
+        }}
         >
 
             <Image 

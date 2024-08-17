@@ -5,55 +5,88 @@ import { Link, router } from 'expo-router';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
 import { useAuthContext } from '@/context/AuthContext';
-import * as DocumentPicker from "expo-document-picker"
+import * as ImagePicker from "expo-image-picker"
 
 import {icons} from "@/constants"
+import { createPost } from '@/lib/supabase';
 
 
 const Create = () => {
 
+  const {user} = useAuthContext()
+
   const [form , setForm] = useState({
     title:"",
     story: "",
-    thumbnail: "",
-    ownerid : "",
+    thumbnail: {
+      uri:""
+    },
+    ownerid : user.id,
     ownerdata: {
-      username: "",
-      avatar_uri: ""
+      username: user.username,
+      avatar_uri: user.avatar_url
     }
   })
 
 
   const openPicker = async () =>{
 
-      const result = await DocumentPicker.getDocumentAsync
-      (
-        {
-          type: ["image/png", "image/jpg"]
-        }
-      )
+      const result = await ImagePicker
+      .launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        aspect: [4,3],
+        quality:1
+      })
 
       if(!result.canceled){
-        setForm({...form, thumbnail: result.assets[0].uri})
-        
+        setForm({...form, thumbnail: result.assets[0]})
+        console.log(result.assets[0])
       }
-      else{
-        setTimeout(()=>{
-          Alert.alert("Document picked", JSON.stringify(result, null, 2))
-        })
-      }
+      
 
      
 
   }
 
   const [isSubmitting, setisSubmitting] = useState(false)
-  const {user} = useAuthContext() 
+   
 
   const Submit = async () =>{
 
-    setForm({...form, ownerid: user.id, ownerdata: { username: user.username, avatar_uri: user.avatar_url}})
-    console.log(form)
+    if(!form.title || !form.story || !form.thumbnail || !form.ownerdata.username || !form.ownerid){
+      return Alert.alert("Missing Info", "Please fill in all the fields")
+    }
+    
+    setisSubmitting(true)
+
+    try{
+     
+
+      await createPost(form);
+
+
+      Alert.alert("Success", "Post updloaded successfully")
+      router.push("/home")
+
+    }catch (error: any){
+       Alert.alert("Error", error.message)
+    }
+    finally{
+      setForm({
+        title:"",
+        story: "",
+        thumbnail:  {
+          uri:""
+        },
+        ownerid : user.id,
+        ownerdata: {
+          username: user.username,
+          avatar_uri: user.avatar_url
+        }
+      })
+
+      setisSubmitting(false)
+    }
   }
 
   return (
@@ -104,9 +137,9 @@ const Create = () => {
 
             <TouchableOpacity onPress={()=> openPicker()}>
                  
-              {form.thumbnail ? (
+              {form.thumbnail.uri ? (
                 <Image 
-                  source={{uri: form.thumbnail}}
+                  source={{uri: form.thumbnail.uri}}
                   className="h-64 w-full rounded-center"
                   resizeMode="cover"
               />

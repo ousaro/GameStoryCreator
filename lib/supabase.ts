@@ -2,7 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { AppState } from 'react-native';
 import { Database } from '@/types/database.types';
- 
+import * as FileSystem from 'expo-file-system';
+import { decode as base64Decode } from 'base64-arraybuffer'; // Import the package for decoding
+import uuid from 'react-native-uuid';
+
+
+
 
 const supabaseUrl =  process.env.EXPO_PUBLIC_SUPABASE_URL || "";
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || "";
@@ -158,6 +163,31 @@ export const getAllPosts = async ()  =>{
 
 }
 
+export const getPostById = async (id:string)  =>{
+
+  try{
+   
+    const {data, error} = await supabase
+        .from("stories")
+        .select('*')
+        .eq("id", id)
+        .single()
+
+
+    if(error){
+      throw new Error(error.message)
+    }
+
+    return data;
+
+  }
+  catch (error: any){
+    throw new Error(error.message)
+  }
+
+}
+
+
 export const searchPosts = async (query:string)  =>{
 
   try{
@@ -204,3 +234,184 @@ export const getUserPosts = async (id:string)  =>{
 
 }
 
+export const uploadFile = async (file:any, storageName:string) =>{
+   try{
+
+      const fileExt = file.uri.split('.').pop()?.toLowerCase() ?? 'jpeg';
+
+      const path = `${Date.now()}.${fileExt}`;
+     
+      const fileContent = await FileSystem.readAsStringAsync(file.uri, { encoding: FileSystem.EncodingType.Base64 });
+
+     
+       // Decode the Base64 content to ArrayBuffer
+    const decodedFileContent = base64Decode(fileContent);
+
+   
+      const { data, error: uploadError } = await supabase.storage
+        .from(storageName)
+        .upload(path,decodedFileContent, {
+          contentType: file.mimeType,
+          cacheControl: "3600",
+          upsert: false
+        })
+
+    if(uploadError){
+      throw uploadError
+    }
+
+   // Construct the URL
+    const fileUrl = `${supabaseUrl}/storage/v1/object/public/${storageName}/${data.path}`;
+
+    return fileUrl;
+    
+
+  }
+  catch (error: any){
+  
+    throw new Error(error.message)
+  }
+}
+
+export const createPost = async (form:any)  =>{
+
+  try{
+    const thumbnailUri = await uploadFile(form.thumbnail,"story_ressources")
+
+   
+    const {data : newPost, error} = await supabase
+        .from("stories")
+        .insert([
+          {
+            title: form.title,
+            story: form.story,
+            thumbnail: thumbnailUri,
+            ownerid: form.ownerid,
+            ownerdata:form.ownerdata
+          }
+        ])
+        
+
+
+    if(error){
+      throw new Error(error.message)
+    }
+
+    return newPost;
+
+   }
+   catch (error: any){
+       throw new Error(error.message)
+   }
+
+}
+
+export const updatePost_CreateCharacter_Area = async(id:string, form:any, type:string) =>{
+    try{
+      const imageUri = await uploadFile(form.image,"story_ressources")
+
+       
+      const uuidv4 = uuid.v4();
+      const uniqueId = uuidv4.toString();
+
+      const {data : newPost, error} = await supabase
+          .from("stories")
+          .update({
+            [type]:{
+
+               [uniqueId]: {
+                description: form.description,
+                image: imageUri
+              }
+            }
+          })
+          .eq('id',id)
+          
+
+
+      if(error){
+        throw new Error(error.message)
+      }
+
+      return newPost;
+
+    }
+    catch (error: any){
+        throw new Error(error.message)
+    }
+}
+
+export const deleteFileFromStorage = async (filePaths:string[], storageName:string) =>{
+
+  try{
+    // Step 2: Delete the file from Supabase storage
+    const { error: deleteFileError } = await supabase
+    .storage
+    .from(storageName)
+    .remove(filePaths);
+
+    if (deleteFileError) {
+      throw new Error(`Error deleting file: ${deleteFileError.message}`);
+    }
+  }catch(error : any){
+    throw new Error(error.message);
+  }
+    
+}
+
+
+export const getFilesPathsPost = async(id:string, storageName:string) =>{
+
+  const data = await getPostById(id)
+
+  // Construct the URL
+  const fileUrl = data.thumbnail;
+
+  const filePaths = [fileUrl];
+
+  const areas : any = data.areas
+  const characters : any = data.characters
+  
+  if(data){
+    for(const ele in characters){
+      const fileUrl = characters[ele].image;
+      filePaths.push(fileUrl)
+    }
+
+    for(const ele in areas){
+      const fileUrl = areas[ele].image;
+      filePaths.push(fileUrl)
+    }
+   
+  }
+
+  return filePaths;
+
+}
+
+export const deletePost = async(id:string) => {
+
+  try {
+
+      // Step 1: Get the file paths associated with the post
+      const filePaths : any[] = await getFilesPathsPost(id,"story_ressources");
+
+      // Step 2: Delete each file from Supabase storage
+      await deleteFileFromStorage(filePaths, 'story_ressources'); // Replace 'your-storage-name' with the actual storage name
+   
+    // // Step 3: Delete the row from the database
+    const { error: deleteRowError } = await supabase
+      .from('stories')
+      .delete()
+      .eq('id', id);
+
+    if (deleteRowError) {
+      throw new Error(`Error deleting row: ${deleteRowError.message}`);
+    }
+
+    return { message: 'Row and associated file deleted successfully.' };
+
+  } catch (error: any) {
+    throw new Error(`Error: ${error.message}`);
+  }
+}

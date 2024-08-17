@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Alert } from "react-native"
  
 const useSupaBase =  (fn: () => any) =>{
-    const [data, setData] = useState<any[]>([])
+    const [data, setData] = useState<any>()
     const [isLoading, setIsLoading] = useState(true)
   
     const fetchStories = async () =>{

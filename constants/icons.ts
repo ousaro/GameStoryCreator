@@ -11,10 +11,13 @@ import eye from "../assets/icons/eye.png";
 import area from "../assets/icons/area.png"
 import character from "../assets/icons/character.png"
 import story from "../assets/icons/story.png"
-
+import arrow from "../assets/icons/arrow.png"
+import deleteIcon from "../assets/icons/delete.png"
 
 export default {
   area,
+  deleteIcon,
+  arrow,
   story,
   character,
   bookmark,

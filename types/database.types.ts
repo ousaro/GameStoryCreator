@@ -74,6 +74,7 @@ export type Database = {
           areas: Json | null
           characters: Json | null
           id: string
+          ownerdata: Json | null
           ownerid: string | null
           story: string
           thumbnail: string | null
@@ -83,7 +84,8 @@ export type Database = {
         Insert: {
           areas?: Json | null
           characters?: Json | null
-          id: string
+          id?: string
+          ownerdata?: Json | null
           ownerid?: string | null
           story: string
           thumbnail?: string | null
@@ -94,6 +96,7 @@ export type Database = {
           areas?: Json | null
           characters?: Json | null
           id?: string
+          ownerdata?: Json | null
           ownerid?: string | null
           story?: string
           thumbnail?: string | null

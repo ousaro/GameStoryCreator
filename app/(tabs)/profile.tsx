@@ -44,11 +44,16 @@ const Profile = () => {
             data={userPosts}
             keyExtractor={(item)=> item.id.toString()}
             renderItem= {({item})=>(
-                <StoryCard  story={item} />
+                <View>
+                  <View>
+                    <Text className="text-third text-2xl font-psemibold items-center px-4 mb-4">Your Posts</Text>
+                  </View>
+                  <StoryCard  story={item} canDelete={true}/>
+                </ View>
             )}
 
             ListHeaderComponent={() =>(
-              <View className='w-full justify-center items-center mt-6 mb-12 px-4'>
+              <View className='w-full justify-center items-center mt-6 mb-8 px-4 '>
                 
                 <TouchableOpacity 
                 className="w-full items-end mb-10"
@@ -79,7 +84,7 @@ const Profile = () => {
                   titleStyles="text-lg"
                 />
 
-                <View className="mt-1 flex-row">
+                <View className=" flex-row mb-3">
 
                     <ProfileInfoBox 
                       title={userPosts.length.toString() || "0"}
@@ -90,6 +95,7 @@ const Profile = () => {
 
 
                 </View>
+
     
               </View>
             )}  
