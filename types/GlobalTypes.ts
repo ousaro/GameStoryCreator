@@ -20,6 +20,7 @@ export interface FormFieldProps {
   export interface EmptyStateProps {
     title: string;
     subtitle: string;
+    route: string;
     buttonTitle?: string;
    
   }

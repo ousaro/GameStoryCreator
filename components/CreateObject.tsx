@@ -1,4 +1,4 @@
-import { Modal, Text, View, Image, ScrollView, TextInput, TouchableOpacity, ImageSourcePropType, Alert } from 'react-native'
+import { Modal, Text, View, Image, ScrollView, TextInput, TouchableOpacity, ImageSourcePropType, Alert, ActivityIndicator } from 'react-native'
 import React, { useState } from 'react'
 import PressableText from './pressableText';
 import { icons } from '@/constants';
@@ -6,7 +6,7 @@ import CustomButton from './CustomButton';
 import * as ImagePicker from "expo-image-picker"
 import {updatePost_CreateCharacter_Area} from "@/lib/supabase"
 
-const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id}: {title:string, modalVisible: boolean, setModalVisible: any, type:string, id:string}) => {
+const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id, refetch}: {title:string, modalVisible: boolean, setModalVisible: any, type:string, id:string, refetch:any}) => {
    
     const [form , setForm] = useState({
         description: "",
@@ -51,12 +51,13 @@ const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id}: {titl
             }
           
           console.log(form)
-          setisSubmitting(false)
           setModalVisible(false)
         } catch (error: any) {
-          setisSubmitting(false)
+          
           Alert.alert("Error", error.message)
         }finally{
+            setisSubmitting(false)
+            refetch()
             setForm({
                 description: "",
                 image: {
@@ -160,7 +161,23 @@ const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id}: {titl
 
                         />
                 </ScrollView>
+
+
+
+                {isSubmitting && 
+                  <View className='absolute h-[150vh] w-full justify-center items-center'>
+                    <View className='h-[150vh] w-full bg-primary opacity-50'>
+                        {/* This view is just for the overlay */}
+                    </View>
+                    <View className='bg-third p-10   bottom-[65%] rounded-lg justify-center items-cente z-10'>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    </View>
+                </View>
+                }
+
             </Modal>
+
+            
         </View>
       )
 }

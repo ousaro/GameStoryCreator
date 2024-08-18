@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, ImageSourcePropType, Alert, AppState} from 'react-native'
+import { View, Text, ScrollView, Image, ImageSourcePropType, Alert, AppState, ActivityIndicator} from 'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, router } from 'expo-router';
@@ -32,7 +32,7 @@ const SignIn = () => {
     
     try {
       
-      const result = await SignInWithEmail(form.email, form.password );
+      const result = await SignInWithEmail(form.email.trim(), form.password );
       const user  = {
         id: result?.user?.id || "",
         username: result?.user?.user_metadata?.username || "",
@@ -105,8 +105,20 @@ const SignIn = () => {
 
         </View>
       </ScrollView>
+
+      {isSubmitting && 
+        <View className='absolute h-full w-full justify-center items-center'>
+          <View className='h-full w-full bg-primary opacity-50'>
+              {/* This view is just for the overlay */}
+          </View>
+          <View className='bg-third p-10   bottom-[45%] rounded-lg justify-center items-cente z-10'>
+              <ActivityIndicator size="large" color="#0000ff" />
+          </View>
+        </View>
+        }
     </SafeAreaView>
   )
 }
 
 export default SignIn
+

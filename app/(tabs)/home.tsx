@@ -1,8 +1,9 @@
-import { View, Text, FlatList , Image, ImageSourcePropType, RefreshControl} from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, FlatList , Image, ImageSourcePropType, RefreshControl, ActivityIndicator} from 'react-native'
+import React, { useCallback, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { getAllPosts } from '@/lib/supabase'
 import { useAuthContext } from "@/context/AuthContext";
+import { useFocusEffect } from '@react-navigation/native'
 
 import SearchInput from '@/components/SearchInput'
 import EmptyState from '@/components/EmptyState'
@@ -14,11 +15,19 @@ import StoryCard from '@/components/StoryCard'
 const Home = () => {
 
 
-  const {user} = useAuthContext()
+  const {user, fetchUserProfile} = useAuthContext()
 
-  const {data: stories , refetch} = useSupaBase(getAllPosts)
+  const {data: stories , refetch, isLoading} = useSupaBase(getAllPosts)
 
   const [refreshing, setRefreshing] = useState(false)
+
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch()
+      fetchUserProfile()
+    }, [])
+  )
 
   const onRefresh = async ()=>{
     setRefreshing(true)
@@ -32,9 +41,9 @@ const Home = () => {
         <FlatList
           data={stories}
           keyExtractor={(item)=> item.id.toString()}
-          renderItem= {({item})=>(
-              <StoryCard  story={item} />
-          )}
+          renderItem= {({ item }) => (
+                <StoryCard story={item} canDelete={false} refetch={refreshing}/>
+              )}
 
           ListHeaderComponent={() =>(
             <View className='my-6 px-4 space-y-4'>
@@ -61,19 +70,29 @@ const Home = () => {
             </View>
           )}  
 
-          ListEmptyComponent={() =>(
-            <EmptyState 
+          ListEmptyComponent={
+            
+            isLoading ? (
+              <View className="h-20 justify-center items-center">
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            ) : (
+              <EmptyState 
               title = "Be the first one to create a story"
               subtitle = "No Posts Found"
               buttonTitle = 'Create Post'
+              route='/create'
             />
-          )}
+            )
+           
+          }
 
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh}/>}
 
         >
 
         </FlatList>
+
       </SafeAreaView>
     </View>
   )

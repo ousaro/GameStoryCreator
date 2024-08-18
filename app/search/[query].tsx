@@ -1,4 +1,4 @@
-import { View, Text, FlatList } from 'react-native'
+import { View, Text, FlatList, ActivityIndicator } from 'react-native'
 import React, { useEffect } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useLocalSearchParams } from 'expo-router'
@@ -14,7 +14,7 @@ const Search = () => {
 
   const {query} = useLocalSearchParams<{query:string}>();
 
-  const {data: searchResults , refetch} = useSupaBase(()=> searchPosts(query || "") )
+  const {data: searchResults , refetch, isLoading} = useSupaBase(()=> searchPosts(query || "") )
  
   useEffect(()=>{
     refetch() 
@@ -42,27 +42,27 @@ const Search = () => {
                       value={query}
                       placeholder='Search for a game story'
                     />
-                </View>
-
-                </View> 
-
-
-               
-              </View>
-
-             
-
-             
+                    </View>
+                </View>   
+              </View>      
             </View>
           )}  
 
-          ListEmptyComponent={() =>(
-            <EmptyState 
+          ListEmptyComponent={
+            isLoading ? (
+              <View className="h-20 justify-center items-center">
+                <ActivityIndicator size="large" color="#0000ff" />
+              </View>
+            ) : (
+              <EmptyState 
               title = "No post match this query"
               subtitle = "No Posts Found"
               buttonTitle = "Back To Explore"
+              route='/home'
             />
-          )}
+            )
+           
+          }
 
         >
 

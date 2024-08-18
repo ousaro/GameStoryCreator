@@ -13,9 +13,11 @@ import character from "../assets/icons/character.png"
 import story from "../assets/icons/story.png"
 import arrow from "../assets/icons/arrow.png"
 import deleteIcon from "../assets/icons/delete.png"
+import edit from "../assets/icons/edit.png"
 
 export default {
   area,
+  edit,
   deleteIcon,
   arrow,
   story,

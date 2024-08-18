@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 
 const pressableText = ({title, onPressHandler, otherStyles}:{title:string, onPressHandler:any, otherStyles?:string}) => {
@@ -14,5 +14,3 @@ const pressableText = ({title, onPressHandler, otherStyles}:{title:string, onPre
 }
 
 export default pressableText
-
-const styles = StyleSheet.create({})

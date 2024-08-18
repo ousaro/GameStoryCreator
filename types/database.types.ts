@@ -34,6 +34,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      favorites: {
+        Row: {
+          id: string
+          ownerid: string | null
+          storyid: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          ownerid?: string | null
+          storyid?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          ownerid?: string | null
+          storyid?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_ownerid_fkey"
+            columns: ["ownerid"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_storyid_fkey"
+            columns: ["storyid"]
+            isOneToOne: false
+            referencedRelation: "stories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -74,7 +110,6 @@ export type Database = {
           areas: Json | null
           characters: Json | null
           id: string
-          ownerdata: Json | null
           ownerid: string | null
           story: string
           thumbnail: string | null
@@ -85,7 +120,6 @@ export type Database = {
           areas?: Json | null
           characters?: Json | null
           id?: string
-          ownerdata?: Json | null
           ownerid?: string | null
           story: string
           thumbnail?: string | null
@@ -96,7 +130,6 @@ export type Database = {
           areas?: Json | null
           characters?: Json | null
           id?: string
-          ownerdata?: Json | null
           ownerid?: string | null
           story?: string
           thumbnail?: string | null

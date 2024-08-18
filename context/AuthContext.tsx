@@ -17,35 +17,39 @@ const AuthProvider = ({children}: PropsWithChildren) => {
     const [isLoading, setisLoading] = useState(true)
 
 
-    useEffect(() => {
-        getUserProfile()
-        .then((res) => {
-            if(res){
+    const fetchUserProfile = async () => {
+        setisLoading(true);
+        try {
+            const res = await getUserProfile();
+            if (res) {
                 setIsLoggedIn(true);
-                setUser(res)
-            }else{
-                setIsLoggedIn(false)
-                setUser(undefined)
+                setUser(res);
+            } else {
+                setIsLoggedIn(false);
+                setUser(undefined);
             }
-        })
-        .catch((error)=>{
-            console.log(error)
-        })
-        .finally(()=>{
-            setisLoading(false)
-        })
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setisLoading(false);
+        }
 
-     
+        console.log("user",user)
+    };
+
+    useEffect(() => {
+        fetchUserProfile();
     }, [])
     
-
+   
     return (
         <AuthContext.Provider value={
            { isLoggedIn,
             setIsLoggedIn,
             user,
             setUser,
-            isLoading}
+            isLoading,
+            fetchUserProfile}
         }>
             {children}
         </AuthContext.Provider>

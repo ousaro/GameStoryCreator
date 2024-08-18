@@ -1,48 +1,100 @@
-import { View, Text, Image, TouchableOpacity , ImageSourcePropType, ScrollView, RefreshControl} from 'react-native'
+import { View, Text, Image, TouchableOpacity , ImageSourcePropType, ScrollView, RefreshControl, Alert, ActivityIndicator} from 'react-native'
 import React, { useEffect, useState,useCallback  } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { router, useLocalSearchParams } from 'expo-router'
-import ObjectsList from '@/components/objectsList'
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
+import ObjectContainer from '@/components/objectContainer'
 import Titles from '@/components/titles'
 import PressableText from '@/components/pressableText'
 import LecturePage from "@/components/lecturePage"
 import CreateObject from "@/components/CreateObject"
 
-import { getPostById } from '@/lib/supabase'
+import { getPostById, getUserById, addToFavorite } from '@/lib/supabase'
 import useSupaBase from '@/lib/useSupaBase'
+
+import { useAuthContext } from '@/context/AuthContext'
 
 import { icons } from '@/constants'
 
 const Story = () => {
 
-  const {id} = useLocalSearchParams<{id:string}>();
 
-  const {data: story, refetch} = useSupaBase(()=> getPostById(id || "") )
+    const {id} = useLocalSearchParams<{id:string}>();
+
+    const {user} = useAuthContext()
+
+    const {data: story, refetch} = useSupaBase(()=> getPostById(id || "") )
+
+    const [owner, setOwner] = useState<any>()
+
+    
+    const characters = story?.characters || {}
+    
+    const areas  = story?.areas || {}
+    
+    const fetchOwner = async () => {
+        try{
+            
+            const owner =  await getUserById(story?.ownerid)
+            setOwner(owner)
+            
+        }catch(error: any){
+        Alert.alert("Error", error.message)
+        }
+    }
+    
+    useFocusEffect(
+        useCallback(() => {
+          refetch()
+        }, [])
+      )
+
+    useEffect(()=>{
+        refetch()
+    }, [id])
 
 
-const characters = story?.characters
+    useEffect(() => {
+        if (story?.ownerid ) {
+        fetchOwner();
+        }
+    }, [story?.ownerid]);
 
-const areas  = story?.areas 
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = useCallback(() => {
+        setRefreshing(true);
+        // Simulate a network request
+        setTimeout(() => {
+        refetch();
+        setRefreshing(false);
+        }, 2000);
+    }, []);
+
+    const [storyModalVisible, setStoryModalVisible] = useState(false);
+    const [characterUploadModalVisible, setCharacterUploadModalVisible] = useState(false);
+    const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
+
+    const [deleting , setDeleting]= useState(false)
+    const [isAddingToFavorite, setIsAddingToFavorite] = useState(false)
 
 
-useEffect(()=>{
-    refetch()
-}, [id])
+    const addToFavorites = async () =>{
 
-const [refreshing, setRefreshing] = useState(false);
+        try{
+            setIsAddingToFavorite(true)
+            await addToFavorite(user?.id, id)
 
-const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    // Simulate a network request
-    setTimeout(() => {
-     refetch();
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+        }catch(error : any){
+            Alert.alert("Error", "Already in your favorite")
+        }finally{
+            setIsAddingToFavorite(false)
+        }
+       
+        
 
-const [storyModalVisible, setStoryModalVisible] = useState(false);
-const [characterUploadModalVisible, setCharacterUploadModalVisible] = useState(false);
-const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
+    }
+
+
 
   return (
     <View>
@@ -79,15 +131,20 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
 
 
 
+
                 <View className='absolute top-[200px] left-6 flex-row gap-3 items-start'>
 
                         <TouchableOpacity className='w-[120px] h-[120px] rounded-lg bg-primary border border-secondary justify-center items-center p-0.5' 
                             activeOpacity={0.8}
-                            onPress={()=> router.push('/profile')}
+                            onPress={()=> {
+                                if(owner?.id === user?.id)
+                                    router.push('/profile')
+                            }
+                            }
                             >
 
                             <Image 
-                                source={{ uri: story?.ownerdata?.avatar_uri}}
+                                source={{ uri: owner?.avatar_url}}
                                 className='w-full h-full rounded-lg'
                                 resizeMode='contain'
                             />
@@ -98,10 +155,25 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
                         <View className='relative justify-center flex-1 ml-3 gap-y-1'>
 
                             <Text className='absolute top-14 text-third font-pbold text-2xl' numberOfLines={1}>
-                                    {story?.ownerdata?.username}
+                                    {owner?.username}
                             </Text>
 
                         </View>
+
+                        <TouchableOpacity className='w-10 h-10 absolute top-14 right-8' 
+                            activeOpacity={0.8}
+                            onPress={()=> {addToFavorites()}}
+                            >
+
+                            <Image 
+                                source={icons.bookmark as ImageSourcePropType}
+                                className='w-full h-full rounded-lg'
+                                resizeMode='contain'
+                            />
+
+
+                        </TouchableOpacity>
+
                         
                 </View>
 
@@ -143,19 +215,35 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
 
                 
                 {/* characters */}
-                {characters ? (
-                    <View className='w-full h-[400px] '>
+                {Object.keys(characters).length !== 0  ? (
+                    <View className='w-full h-[460px] '>
                     
                         <View className=' bg-third w-full h-0.5 mt-8' />
                         <Titles title='Game Characters' icon={icons.character as ImageSourcePropType}/>
-                        <ObjectsList objects={characters} title='Character'/>
-                        <PressableText title='add new Character' onPressHandler={()=>setCharacterUploadModalVisible(!characterUploadModalVisible)}/>
+                        <View className='space-y-2'>
+
+                            {Object.entries(characters)?.map((item: any, index: number) =>(
+                                <ObjectContainer 
+                                key={index} 
+                                index={index} 
+                                item={item} 
+                                title="Character" 
+                                storyId={id}
+                                type="characters"
+                                setDeleting={setDeleting}
+                                refetch = {refetch}
+                                />
+                            ) )}
+
+                        </View>
+                        {owner?.id === user?.id && <PressableText title='add new Character' onPressHandler={()=>setCharacterUploadModalVisible(!characterUploadModalVisible)}/>}
                         <CreateObject 
                             title="Upload your character"
                             modalVisible={characterUploadModalVisible}
                             setModalVisible={setCharacterUploadModalVisible}
-                            type="character"
+                            type="Character"
                             id={id}
+                            refetch={refetch}
                          />
                     
                     </View>):
@@ -167,13 +255,14 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
                         <Text className='text-center text-third font-pregular text-mg'>
                             No characters available
                         </Text>
-                        <PressableText title='add new Character' onPressHandler={()=>setCharacterUploadModalVisible(!characterUploadModalVisible)}/>
+                        {owner?.id === user?.id && <PressableText title='add new Character' onPressHandler={()=>setCharacterUploadModalVisible(!characterUploadModalVisible)}/>}
                         <CreateObject 
                             title="Upload your character"
                             modalVisible={characterUploadModalVisible}
                             setModalVisible={setCharacterUploadModalVisible}
                             type="Character"
                             id={id}
+                            refetch={refetch}
                          />
 
                     </View>
@@ -181,19 +270,36 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
 
                 
                 {/* areas */}
-                {areas ? (
-                    <View className='w-full h-[400px] '>
+                {Object.keys(areas).length !== 0  ? (
+                    <View className='w-full h-[460px] '>
                
                         <View className=' bg-third w-full h-0.5 mt-8' />
                         <Titles title='Game Areas' icon={icons.area as ImageSourcePropType}/>
-                        <ObjectsList objects={areas} title='Area'/>
-                        <PressableText title='add new Area' onPressHandler={()=>setAreaUploadModalVisible(!areaUploadModalVisible)}/>
+                        <View className='space-y-2'>
+
+                            {Object.entries(areas)?.map((item: any, index: number) =>(
+                                <ObjectContainer 
+                                key={index} 
+                                index={index} 
+                                item={item} 
+                                title="Area" 
+                                storyId={id} 
+                                type="areas"
+                                setDeleting={setDeleting}
+                                refetch = {refetch}
+                                />
+                            ) )}
+
+                        </View>
+
+                        { owner?.id === user?.id && <PressableText title='add new Area' onPressHandler={()=>setAreaUploadModalVisible(!areaUploadModalVisible)}/>}
                         <CreateObject 
                             title="Upload your area"
                             modalVisible={areaUploadModalVisible}
                             setModalVisible={setAreaUploadModalVisible}
                             type="Area"
                             id={id}
+                            refetch={refetch}
                          />
                         
                     </View>
@@ -203,17 +309,18 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
                     <View className='w-full h-[150px] '>
                     
                         <View className=' bg-third w-full h-0.5 mt-8' />
-                        <Titles title='Game Areas' icon={icons.character as ImageSourcePropType}/>
+                        <Titles title='Game Areas' icon={icons.area as ImageSourcePropType}/>
                         <Text className='text-center text-third font-pregular text-mg'>
                             No area available
                         </Text>
-                        <PressableText title='add new Area' onPressHandler={()=>setAreaUploadModalVisible(!areaUploadModalVisible)}/>
+                        { owner?.id === user?.id && <PressableText title='add new Area' onPressHandler={()=>setAreaUploadModalVisible(!areaUploadModalVisible)}/>}
                         <CreateObject 
                             title="Upload your area"
                             modalVisible={areaUploadModalVisible}
                             setModalVisible={setAreaUploadModalVisible}
                             type="Area"
                             id={id}
+                            refetch={refetch}
                          />
 
                     </View>
@@ -222,6 +329,17 @@ const [areaUploadModalVisible, setAreaUploadModalVisible] = useState(false);
                 
             </View>
         </ScrollView>
+
+            {(deleting || isAddingToFavorite ) && 
+                <View className='absolute h-[150vh] w-full justify-center items-center'>
+                    <View className='h-[150vh] w-full bg-primary opacity-50'>
+                        {/* This view is just for the overlay */}
+                    </View>
+                    <View className='bg-third p-10   bottom-[65%] rounded-lg justify-center items-cente z-10'>
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    </View>
+                </View>
+                }
       </SafeAreaView>
     </View>
   )

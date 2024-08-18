@@ -1,6 +1,6 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { Image, ScrollView, Text, View, ImageSourcePropType } from "react-native";
+import { Image, ScrollView, Text, View, ImageSourcePropType, ActivityIndicator } from "react-native";
 import { Redirect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthContext } from "@/context/AuthContext";
@@ -16,7 +16,18 @@ export default function App() {
   const {isLoading, isLoggedIn} = useAuthContext()
 
 
-  if(!isLoading && isLoggedIn) return <Redirect href="/home" />
+  if(!isLoading && isLoggedIn) {
+    return (<Redirect href="/home" />)
+  
+  }
+
+  if(isLoading){
+    return (
+      <View className="h-full justify-center items-center bg-primary">
+          <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    )
+  }
 
 
   return (

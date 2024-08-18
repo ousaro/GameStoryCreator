@@ -18,6 +18,7 @@ const SearchInput = ({value, otherStyle, keyboardType,placeholder, ...props}: Se
             value={query}
             placeholder={placeholder}
             placeholderTextColor="#A6A6B4"
+            autoCapitalize="none"
             onChangeText={(e) => setQuery(e)}
         />
 

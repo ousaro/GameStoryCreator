@@ -1,4 +1,4 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, ImageSourcePropType, TextInput,Alert } from'react-native'
+import { View, Text, ScrollView, Image, TouchableOpacity, ImageSourcePropType, TextInput,Alert, ActivityIndicator } from'react-native'
 import React, { useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, router } from 'expo-router';
@@ -21,11 +21,7 @@ const Create = () => {
     thumbnail: {
       uri:""
     },
-    ownerid : user.id,
-    ownerdata: {
-      username: user.username,
-      avatar_uri: user.avatar_url
-    }
+    ownerid : user?.id
   })
 
 
@@ -39,8 +35,7 @@ const Create = () => {
       })
 
       if(!result.canceled){
-        setForm({...form, thumbnail: result.assets[0]})
-        console.log(result.assets[0])
+        setForm({...form, thumbnail: result.assets[0]})     
       }
       
 
@@ -53,7 +48,7 @@ const Create = () => {
 
   const Submit = async () =>{
 
-    if(!form.title || !form.story || !form.thumbnail || !form.ownerdata.username || !form.ownerid){
+    if(!form.title || !form.story || !form.thumbnail  || !form.ownerid){
       return Alert.alert("Missing Info", "Please fill in all the fields")
     }
     
@@ -78,11 +73,7 @@ const Create = () => {
         thumbnail:  {
           uri:""
         },
-        ownerid : user.id,
-        ownerdata: {
-          username: user.username,
-          avatar_uri: user.avatar_url
-        }
+        ownerid : user?.id
       })
 
       setisSubmitting(false)
@@ -167,6 +158,18 @@ const Create = () => {
 
             />
       </ScrollView>
+
+
+      {isSubmitting && 
+              <View className='absolute h-full w-full justify-center items-center'>
+                <View className='h-full w-full bg-primary opacity-50'>
+                    {/* This view is just for the overlay */}
+                </View>
+                <View className='bg-third p-10   bottom-1/3 rounded-lg justify-center items-cente z-10'>
+                    <ActivityIndicator size="large" color="#0000ff" />
+                </View>
+              </View>
+            }
     </SafeAreaView>
   )
 }

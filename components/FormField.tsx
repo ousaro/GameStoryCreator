@@ -20,6 +20,7 @@ const FormField = ({title, value, handleChageText, otherStyle, keyboardType,plac
                 placeholder={placeholder}
                 placeholderTextColor="#A6A6B4"
                 onChangeText={handleChageText}
+                autoCapitalize="none"
                 secureTextEntry={title === "Password" && !showPassword}
  
             />

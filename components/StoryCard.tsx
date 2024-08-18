@@ -1,21 +1,39 @@
-import { TouchableOpacity, Text, View, Image, Alert, ImageSourcePropType} from 'react-native'
-import React from 'react'
+import { TouchableOpacity, Text, View, Image, Alert, ImageSourcePropType } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { router, usePathname, Href } from 'expo-router'
 import {icons} from "@/constants"
-import {deletePost} from "@/lib/supabase"
+import {deletePost, getUserById} from "@/lib/supabase"
+import { useAuthContext } from '@/context/AuthContext'
+import PressableText from './pressableText'
 
 
-const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => {
+const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton} : {story : any, canDelete?: boolean, setIsDeleting?: any, refetch?:boolean, textButton?:boolean})  => {
 
     const pathName = usePathname()
     let storyId : string = story.id || ""
 
-    const handleDeletePost = async ()=>{
-        
-        await deletePost(story.id)
-        
-        Alert.alert("Success", "Post successfully deleted")
-    }
+    const {user} = useAuthContext()
+
+    const [owner, setOwner] = useState<any>(undefined)
+
+   
+    const handleDeletePost = async () => {
+        setIsDeleting(true)
+        await deletePost(story.id);
+        setIsDeleting(false)
+        Alert.alert("Success", "Post successfully deleted");
+    };
+
+    useEffect(()=>{
+        const fetchOwner = async () =>{
+
+            const owner = await getUserById(story?.ownerid)
+            setOwner(owner)
+
+        }
+
+        fetchOwner()
+    },[refetch])
 
 
   return (
@@ -27,11 +45,14 @@ const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => 
 
                 <TouchableOpacity className='w-[46px] h-[46px] rounded-lg border border-secondary justify-center items-center p-0.5' 
                     activeOpacity={0.8}
-                    onPress={()=> router.push('/profile')}
+                    onPress={()=> {
+                        if(owner?.id === user?.id) 
+                            router.push('/profile')}
+                        }
                     >
 
                     <Image 
-                        source={{ uri: story.ownerdata?.avatar_uri}}
+                        source={{ uri: owner?.avatar_url}}
                         className='w-full h-full rounded-lg'
                         resizeMode='contain'
                     />
@@ -46,11 +67,12 @@ const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => 
                     </Text>
 
                     <Text className='text-third font-pregular text-xs' numberOfLines={1}>
-                            {story.ownerdata?.username}
+                            {owner?.username}
                     </Text>
 
                 </View>
 
+                { canDelete &&
                 <TouchableOpacity 
                 onPress={handleDeletePost}
                 >
@@ -59,7 +81,7 @@ const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => 
                         className='w-6 h-6 rounded-lg'
                         resizeMode='contain'
                     />
-                </TouchableOpacity>
+                </TouchableOpacity>}
 
             </View>
 
@@ -91,6 +113,9 @@ const StoryCard = ({story, canDelete} : {story : any, canDelete?: boolean})  => 
             />
 
         </TouchableOpacity>
+
+        {textButton && <PressableText title='delete' onPressHandler={()=>{}}/>}
+       
 
     </View>
   )

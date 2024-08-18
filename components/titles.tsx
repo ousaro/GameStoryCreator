@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View,ImageSourcePropType, Image } from 'react-native'
+import { Text, View,ImageSourcePropType, Image } from 'react-native'
 import React from 'react'
 
 const titles = ({title, icon}: {title:string, icon: ImageSourcePropType}) => {
@@ -21,5 +21,3 @@ const titles = ({title, icon}: {title:string, icon: ImageSourcePropType}) => {
 }
 
 export default titles
-
-const styles = StyleSheet.create({})
