@@ -4,11 +4,11 @@
     "slug": "GameStoryCrafter",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/Logo.png",
+    "icon": "./assets/images/LogoIcon.png",
     "scheme": "GameStoryCrafter",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/SplashScreen.png",
+      "image": "./assets/images/SplashScreenTransparent.png",
       "resizeMode": "contain",
       "backgroundColor": "#161622"
     },
@@ -17,7 +17,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/Logo without text.png",
+        "foregroundImage": "./assets/images/Logo-adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "softwareKeyboardLayoutMode": "pan",
