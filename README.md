@@ -77,8 +77,8 @@ Before you begin, ensure you have met the following requirements:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/gamestorycreator.git
-   cd gamestorycreator
+   git clone https://github.com/ousaro/GameStoryCreator.git
+   cd GameStoryCreator
    ```
 
 2. **Install dependencies:**
