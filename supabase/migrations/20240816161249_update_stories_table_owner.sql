@@ -1,7 +1,4 @@
 
-drop table stories;
-
-
 -- Create a table for stories with JSONB fields for characters and areas
 create table stories (
   id uuid primary key DEFAULT gen_random_uuid(),
@@ -14,3 +11,6 @@ create table stories (
   characters jsonb,
   areas jsonb
 );
+
+insert into storage.buckets (id, name)
+  values (gen_random_uuid(), 'story_images');
