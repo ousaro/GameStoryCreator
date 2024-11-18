@@ -18,3 +18,10 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
+
+
+
+# Supabase
+./supabase/.branches
+./supabase/.temp
+./supabase/.env

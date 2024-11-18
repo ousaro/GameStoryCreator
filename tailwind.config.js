@@ -1,3 +1,5 @@
+const { DEFAULT_EXTENSIONS } = require('@babel/core');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
@@ -8,6 +10,12 @@ module.exports = {
         secondary: {
           DEFAULT: "#3D5AF1",      
         },
+        third: {
+          DEFAULT: "#D9D9D9",
+          100: "#A6A6B4",
+         
+        },
+        fourth: "#1E1E2D",
         black: {
           DEFAULT: "#000",
           100: "#1E1E2D",
