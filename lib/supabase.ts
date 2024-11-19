@@ -641,3 +641,95 @@ export const getUserFavoritePosts = async (userId:string) => {
    }
   
 }
+
+
+export const deleteFavorite = async (ownerId: string, storyId: string) => {
+  
+  try{
+    const { data, error } = await supabase
+    .from('favorites')
+    .delete()
+    .match({ ownerid: ownerId, storyid: storyId });
+
+    if (error) {
+      throw new Error(error.message);
+    } 
+
+
+    return data;
+
+
+  }
+  catch (error: any){
+      throw new Error(error.message)
+  }
+
+};
+
+
+export const updatePost = async (field:string, updates: any, id:string) =>{
+  try{
+
+    // Update the specified field in the stories table
+    const { data: newPost, error: updateError } = await supabase
+      .from('stories')
+      .update({ [field] : updates })
+      .eq('id', id);
+
+    // Handle potential errors
+    if (updateError) {
+      throw updateError;
+    }
+
+    return newPost;
+
+  }
+  catch (error: any){ 
+      throw new Error(error.message)
+  }
+}
+
+
+export const updatePost_Character_Area_desc = async (type:string, updates: any, id:string, objId:string) =>{
+  try{
+      // Fetch the current story to update
+      const { data: currentStory, error: fetchError } = await supabase
+      .from('stories')
+      .select(type)
+      .eq('id', id)
+      .single();
+
+      if (fetchError) {
+      throw fetchError;
+      }
+
+      // Merge the new entry with the existing entries
+      const updatedTypeField = {
+      // @ts-ignore
+      ...currentStory[type] ,
+      [objId]: {
+        // @ts-ignore
+        ...currentStory[type][objId],
+        description: updates,
+      },
+      
+      };
+
+      // Update the specified field in the stories table
+      const { data: newPost, error: updateError } = await supabase
+      .from('stories')
+      .update({ [type]: updatedTypeField })
+      .eq('id', id);
+
+      // Handle potential errors
+      if (updateError) {
+      throw updateError;
+      }
+
+      return newPost;
+
+  }
+  catch (error: any){ 
+      throw new Error(error.message)
+  }
+}

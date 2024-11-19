@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity , ImageSourcePropType, ScrollView, RefreshControl, Alert, ActivityIndicator} from 'react-native'
+import { View, Text, Image, TouchableOpacity , ImageSourcePropType, ScrollView, RefreshControl, Alert, ActivityIndicator, TextInput} from 'react-native'
 import React, { useEffect, useState,useCallback  } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router'
@@ -8,7 +8,7 @@ import PressableText from '@/components/pressableText'
 import LecturePage from "@/components/lecturePage"
 import CreateObject from "@/components/CreateObject"
 
-import { getPostById, getUserById, addToFavorite } from '@/lib/supabase'
+import { getPostById, getUserById, addToFavorite, updatePost } from '@/lib/supabase'
 import useSupaBase from '@/lib/useSupaBase'
 
 import { useAuthContext } from '@/context/AuthContext'
@@ -76,7 +76,8 @@ const Story = () => {
 
     const [deleting , setDeleting]= useState(false)
     const [isAddingToFavorite, setIsAddingToFavorite] = useState(false)
-
+    const [updating, setUpdating ] = useState(false)
+  
 
     const addToFavorites = async () =>{
 
@@ -94,6 +95,35 @@ const Story = () => {
 
     }
 
+
+    const [storyText, setStoryText] = useState(story?.story)
+    const [isEditable, setIsEditable] = useState(false);
+
+    useEffect(() => {
+        if (story?.story) {
+          setStoryText(story.story);
+        }
+      }, [story]);
+    
+
+
+    const submitChanges = async (field:string, updates:string) => {
+
+        try{
+          
+            setUpdating(true)
+            await updatePost(field, updates, id)
+            refetch()
+
+        }catch(error : any){
+            Alert.alert("Error", "Can't update")
+        }finally{
+            setUpdating(false)
+            setIsEditable(false)
+        }
+       
+        
+    }
 
 
   return (
@@ -197,11 +227,41 @@ const Story = () => {
                     className='w-full h-[405px] bg-fourth p-4 '
                     onPress={()=>setStoryModalVisible(true)}
                     >
-                        <Text className='text-third font-pregular text-mg' numberOfLines={17} 
-                            ellipsizeMode='tail'>
-                            {story?.story}
-                        </Text>
+                        
+                        <TextInput 
+                            className='text-third font-pregular text-mg '
+                            value={storyText}
+                            onChangeText={(e)=>setStoryText(e)}
+                            multiline={true} // Make it multiline
+                            scrollEnabled={true} // Enable scrolling
+                            numberOfLines={19} // Initial number of lines
+                            textAlignVertical="top" // Align text to the top
+                            placeholderTextColor="#A6A6B4"
+                            editable={isEditable} // Control editable state
+                        />
                     </TouchableOpacity>
+
+                   {owner?.id === user?.id && 
+                   ( !isEditable ?  
+                        (
+                            <TouchableOpacity className='w-full justify-end items-end mt-2' 
+                                onPress={() => setIsEditable(true)}
+                            >
+                                <Image 
+                                source={icons.edit2 as ImageSourcePropType}
+                                className='w-5 h-5'
+                                resizeMode='cover'
+                                />
+
+                            </TouchableOpacity>
+                        ) 
+                        :
+                        (
+                            <>
+                                <PressableText title="save" onPressHandler={()=>submitChanges("story",storyText)}/>
+                            </>
+                        )  
+                    )}
 
                     <LecturePage  
                         modalVisible={storyModalVisible} 
@@ -216,7 +276,7 @@ const Story = () => {
                 
                 {/* characters */}
                 {Object.keys(characters).length !== 0  ? (
-                    <View className='w-full h-[460px] '>
+                    <View className='w-full'>
                     
                         <View className=' bg-third w-full h-0.5 mt-8' />
                         <Titles title='Game Characters' icon={icons.character as ImageSourcePropType}/>
@@ -232,6 +292,9 @@ const Story = () => {
                                 type="characters"
                                 setDeleting={setDeleting}
                                 refetch = {refetch}
+                                ownerId={owner?.id}
+                                userId={user?.id}
+                                setUpdating={setUpdating}
                                 />
                             ) )}
 
@@ -271,7 +334,7 @@ const Story = () => {
                 
                 {/* areas */}
                 {Object.keys(areas).length !== 0  ? (
-                    <View className='w-full h-[460px] '>
+                    <View className='w-full'>
                
                         <View className=' bg-third w-full h-0.5 mt-8' />
                         <Titles title='Game Areas' icon={icons.area as ImageSourcePropType}/>
@@ -287,6 +350,9 @@ const Story = () => {
                                 type="areas"
                                 setDeleting={setDeleting}
                                 refetch = {refetch}
+                                ownerId={owner?.id}
+                                userId={user?.id}
+                                setUpdating={setUpdating}
                                 />
                             ) )}
 
@@ -330,7 +396,7 @@ const Story = () => {
             </View>
         </ScrollView>
 
-            {(deleting || isAddingToFavorite ) && 
+            {(deleting || isAddingToFavorite || updating ) && 
                 <View className='absolute h-[150vh] w-full justify-center items-center'>
                     <View className='h-[150vh] w-full bg-primary opacity-50'>
                         {/* This view is just for the overlay */}

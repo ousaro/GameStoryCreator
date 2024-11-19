@@ -14,10 +14,12 @@ import story from "../assets/icons/story.png"
 import arrow from "../assets/icons/arrow.png"
 import deleteIcon from "../assets/icons/delete.png"
 import edit from "../assets/icons/edit.png"
+import edit2 from "../assets/icons/edit2.png"
 
 export default {
   area,
   edit,
+  edit2,
   deleteIcon,
   arrow,
   story,

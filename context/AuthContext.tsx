@@ -33,8 +33,7 @@ const AuthProvider = ({children}: PropsWithChildren) => {
         } finally {
             setisLoading(false);
         }
-
-        console.log("user",user)
+        
     };
 
     useEffect(() => {

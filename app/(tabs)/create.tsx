@@ -5,7 +5,7 @@ import { Link, router } from 'expo-router';
 import FormField from '@/components/FormField';
 import CustomButton from '@/components/CustomButton';
 import { useAuthContext } from '@/context/AuthContext';
-import * as ImagePicker from "expo-image-picker"
+import * as DocumentPicker from 'expo-document-picker';
 
 import {icons} from "@/constants"
 import { createPost } from '@/lib/supabase';
@@ -27,19 +27,14 @@ const Create = () => {
 
   const openPicker = async () =>{
 
-      const result = await ImagePicker
-      .launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        aspect: [4,3],
-        quality:1
-      })
+      const result = await DocumentPicker.getDocumentAsync
+        ({
+          type: ["image/png", "image/jpg", "image/jpge", "image/gif"]
+        })
 
       if(!result.canceled){
         setForm({...form, thumbnail: result.assets[0]})     
       }
-      
-
-     
 
   }
 

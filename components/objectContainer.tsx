@@ -1,13 +1,16 @@
-import {  Text, View,Image, TouchableOpacity, Alert } from 'react-native'
+import {  Text, View,Image, TouchableOpacity, Alert, TextInput } from 'react-native'
 import React, { useState } from 'react'
 import LecturePage from './lecturePage'
 import PressableText from './pressableText';
-import { deletePost_CreateCharacter_Area } from '@/lib/supabase';
+import { deletePost_CreateCharacter_Area, updatePost_Character_Area_desc } from '@/lib/supabase';
 
-const objectContainer = ({item, index, title , storyId, type , setDeleting, refetch}: {item:any, index:number, title:string, storyId:string , type:string, setDeleting:any, refetch:any}) => {
+const objectContainer = ({item, index, title , storyId, type , setDeleting, refetch, ownerId, userId , setUpdating}: 
+    {item:any, index:number, title:string, storyId:string , type:string, setDeleting:any, refetch:any, ownerId?:string, userId?:string, setUpdating:any}) => {
 
 
     const [modalVisible, setModalVisible] = useState<boolean>(false);
+    const [description, setDescription] = useState(item[1]?.description)
+    const [isEditable, setIsEditable] = useState(false);
 
     const handleDeleteItem = async () => {
         try{
@@ -20,6 +23,24 @@ const objectContainer = ({item, index, title , storyId, type , setDeleting, refe
         }catch(error : any){
             Alert.alert("Error", error.message)
         }
+    }
+
+    const submitChanges = async (type:string, updates:string) => {
+
+        try{
+          
+            setUpdating(true)
+            await updatePost_Character_Area_desc(type, updates, storyId ,item[0])
+            refetch()
+
+        }catch(error : any){
+            Alert.alert("Error", "Can't update")
+        }finally{
+            setUpdating(false)
+            setIsEditable(false)
+        }
+       
+        
     }
 
 
@@ -39,12 +60,17 @@ const objectContainer = ({item, index, title , storyId, type , setDeleting, refe
             className='w-2/3 h-[150px] bg-fourth p-4'
             onPress={() => setModalVisible(!modalVisible)}
             >
-                <Text 
-                className='text-third font-pregular text-mg'
-                numberOfLines={5} 
-                ellipsizeMode='tail'  >
-                    {item[1]?.description}
-                </Text>
+                <TextInput 
+                    className='text-third font-pregular text-mg '
+                    value={description}
+                    onChangeText={(e)=>setDescription(e)}
+                    multiline={true} // Make it multiline
+                    scrollEnabled={true} // Enable scrolling
+                    numberOfLines={5} // Initial number of lines
+                    textAlignVertical="top" // Align text to the top
+                    placeholderTextColor="#A6A6B4"
+                    editable={isEditable} // Control editable state
+                />
             </TouchableOpacity>
 
             <LecturePage  
@@ -56,8 +82,31 @@ const objectContainer = ({item, index, title , storyId, type , setDeleting, refe
                 />
         </View>
 
-        <View>
-            <PressableText title='delete' onPressHandler={handleDeleteItem}/>
+        <View className='flex-row justify-end'>
+
+            <View className='mr-3'>
+                {ownerId === userId && 
+                ( !isEditable ?  
+                    (
+                        <>
+                            <PressableText title="edit" onPressHandler={()=>setIsEditable(true)}/>
+                        </>
+                    ) 
+                    :
+                    (
+                        <>
+                            <PressableText title="save" onPressHandler={()=>submitChanges(type,description)}/>
+                        </>
+                    )  
+                )}
+
+
+            </View>
+            
+            <View className='ml-3'>
+                { ownerId === userId &&<PressableText title='delete' onPressHandler={handleDeleteItem}/>}
+            </View>
+            
         </View>
 
         

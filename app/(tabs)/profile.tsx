@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { getUserPosts, SignOut } from '@/lib/supabase'
 import { useAuthContext } from "@/context/AuthContext";
 import {router, useFocusEffect} from "expo-router"
-import * as ImagePicker from "expo-image-picker"
+import * as DocumentPicker from 'expo-document-picker';
 
 import {icons} from "@/constants"
 
@@ -52,13 +52,12 @@ const Profile = () => {
 
   const openPicker = async () =>{
 
-    const result = await ImagePicker
-    .launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      aspect: [4,3],
-      quality:1
+    const result = await DocumentPicker.getDocumentAsync
+    ({
+        type: ["image/png", "image/jpg", "image/jpge", "image/gif"]
     })
 
+    
     if(!result.canceled){
       Submit(result.assets[0])
     }
@@ -67,7 +66,7 @@ const Profile = () => {
 
 const [isUpdatingAvatar, setisUpdatingAvatar] = useState(false)
 
-const Submit = async (file:Json)=>{
+const Submit = async (file:any)=>{
 
   try{
     setisUpdatingAvatar(true)

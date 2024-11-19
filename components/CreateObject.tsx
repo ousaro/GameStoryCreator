@@ -3,8 +3,9 @@ import React, { useState } from 'react'
 import PressableText from './pressableText';
 import { icons } from '@/constants';
 import CustomButton from './CustomButton';
-import * as ImagePicker from "expo-image-picker"
+import * as DocumentPicker from 'expo-document-picker';
 import {updatePost_CreateCharacter_Area} from "@/lib/supabase"
+
 
 const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id, refetch}: {title:string, modalVisible: boolean, setModalVisible: any, type:string, id:string, refetch:any}) => {
    
@@ -19,21 +20,16 @@ const CreateObject =  ({ title ,modalVisible , setModalVisible, type, id, refetc
 
       const openPicker = async () =>{
 
-        const result = await ImagePicker
-        .launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.Images,
-          aspect: [4,3],
-          quality:1
+        const result = await DocumentPicker.getDocumentAsync
+        ({
+          type: ["image/png", "image/jpg", "image/jpge", "image/gif"]
         })
   
         if(!result.canceled){
           setForm({...form, image: result.assets[0]})         
         }
         
-  
-       
-  
-    }
+      }
 
     const Submit = async () =>{
 

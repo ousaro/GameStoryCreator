@@ -2,12 +2,13 @@ import { TouchableOpacity, Text, View, Image, Alert, ImageSourcePropType } from 
 import React, { useEffect, useState } from 'react'
 import { router, usePathname, Href } from 'expo-router'
 import {icons} from "@/constants"
-import {deletePost, getUserById} from "@/lib/supabase"
+import {deletePost, getUserById, deleteFavorite} from "@/lib/supabase"
 import { useAuthContext } from '@/context/AuthContext'
 import PressableText from './pressableText'
 
 
-const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton} : {story : any, canDelete?: boolean, setIsDeleting?: any, refetch?:boolean, textButton?:boolean})  => {
+const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton, refetching} : 
+    {story : any, canDelete?: boolean, setIsDeleting?: any, refetch?:boolean, textButton?:boolean, refetching?:any})  => {
 
     const pathName = usePathname()
     let storyId : string = story.id || ""
@@ -15,6 +16,8 @@ const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton} : {st
     const {user} = useAuthContext()
 
     const [owner, setOwner] = useState<any>(undefined)
+    
+
 
    
     const handleDeletePost = async () => {
@@ -23,6 +26,16 @@ const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton} : {st
         setIsDeleting(false)
         Alert.alert("Success", "Post successfully deleted");
     };
+
+
+    const removeFromFavorite = async () =>{
+
+        setIsDeleting(true)
+        await deleteFavorite(user?.id, story?.id)
+        setIsDeleting(false)
+        refetching()
+
+    }
 
     useEffect(()=>{
         const fetchOwner = async () =>{
@@ -114,8 +127,7 @@ const StoryCard = ({story, canDelete, setIsDeleting , refetch, textButton} : {st
 
         </TouchableOpacity>
 
-        {textButton && <PressableText title='delete' onPressHandler={()=>{}}/>}
-       
+        {textButton && <PressableText title='Delete from favorites' onPressHandler={removeFromFavorite}/>}
 
     </View>
   )

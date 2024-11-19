@@ -20,9 +20,8 @@
         "foregroundImage": "./assets/images/Logo without text.png",
         "backgroundColor": "#ffffff"
       },
-      "softwareKeyboardLayoutMode": "pan"
-
-      
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.ousaro.GameStoryCrafter"
     },
     "web": {
       "bundler": "metro",
@@ -34,6 +33,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "b151bc02-87b4-4e90-95e6-e3ab9c1ea82b"
+      }
     }
   }
 }
