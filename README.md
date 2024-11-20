@@ -62,7 +62,7 @@ When you click on the story or the character.
 </div>
 
 ### Video Showing tha app working
-[Preview Video](./assets/screenshots/preview.mp4)
+[Preview Video](https://youtube.com/shorts/K2OQFeWnF5s?feature=share)
 
 
 ## Prerequisites
