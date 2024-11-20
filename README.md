@@ -1,7 +1,6 @@
 # GameStoryCreator
 
-**GameStoryCreator** is a mobile application built with React Native, Expo, NativeWind, TypeScript, and Supabase. This app allows users to post their game stories, including sections for the story itself, character lists with descriptions, and areas with descriptions. Users can also search for specific posts or save the ones they like.
-
+**GameStoryCreator** is a mobile application built with React Native, Expo, NativeWind, TypeScript, and Supabase. This app enables users to share their game story ideas with a like-minded community. Features include sections for posting game stories, character lists with descriptions, and detailed area descriptions. Users can also search for specific posts or save their favorites. **GameStoryCreator** serves as a platform to connect creative minds and could even spark the creation of future games.
 ## Table of Contents
 
 - Features
