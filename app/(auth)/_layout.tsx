@@ -12,10 +12,11 @@ const AuthLayout = () => {
   const {isLoading, isLoggedIn} = useAuthContext()
 
 
+  // if user is logged in, redirect to home page
   if(!isLoading && isLoggedIn) return <Redirect href="/home" />
-
   return (
     <> 
+      
       <Stack>
         <Stack.Screen 
           name="signIn"
@@ -25,8 +26,8 @@ const AuthLayout = () => {
           name="signUp" 
           options={{headerShown: false}}
           />
-
       </Stack>
+
 
       <StatusBar backgroundColor="#161622" style="light" />
     </>
