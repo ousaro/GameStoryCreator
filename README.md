@@ -62,9 +62,8 @@ When you click on the story or the character.
 </div>
 
 ### Video Showing tha app working
-<video src="./assets/screenshots/preview.mp4" controls="controls" style="max-width: 100%;">
-    Your browser does not support the video tag.
-</video>
+[Preview Video](./assets/screenshots/preview.mp4)
+
 
 ## Prerequisites
 
